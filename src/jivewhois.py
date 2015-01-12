@@ -8,10 +8,17 @@ import argparse
 from StringIO import StringIO
 import sys
 from prettytable import PrettyTable
+from pytz import timezone
+from datetime import datetime
 
 def error(str):
 	print str
 	sys.exit(1);
+
+def getLocalTime(tzName):
+	tz = timezone(tzName)
+
+	return tz.localize(datetime.now()).strftime("%H:%M")
 
 def readConfig():
 	configFile = expanduser("~") + '/.jivewhois.ini'
@@ -75,7 +82,7 @@ if not args.quiet:
 	table.add_row(['E-Mail', person['emails'][0]['value']])
 	table.add_row(['Job title', person['jive']['profile'][0]['value']])
 	table.add_row(['Location', person['location']]);
-	table.add_row(['Timezone', person['jive']['timeZone']]);
+	table.add_row(['Timezone', person['jive']['timeZone'] + " - " + getLocalTime(person['jive']['timeZone'])])
 
 	table.add_row(["---", "---"])
 	for phone in person['phoneNumbers']:
