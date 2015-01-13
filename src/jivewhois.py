@@ -8,6 +8,7 @@ import argparse
 from StringIO import StringIO
 import sys
 from prettytable import PrettyTable
+from pytz import timezone
 from datetime import datetime
 
 def error(str):
