@@ -41,7 +41,7 @@ config = readConfig()
 
 parser = argparse.ArgumentParser();
 parser.add_argument('email')
-parser.add_argument('--printJson', action = 'store_true')
+parser.add_argument('--printJson', '--json', '-j', action = 'store_true')
 parser.add_argument('-q', '--quiet', action = 'store_true', help = "Don't print the actual output table")
 args = parser.parse_args();
 
