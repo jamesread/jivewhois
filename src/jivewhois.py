@@ -10,6 +10,7 @@ import sys
 from prettytable import PrettyTable
 from pytz import timezone
 from datetime import datetime
+import os
 
 def error(str):
 	print str
@@ -43,6 +44,9 @@ parser = argparse.ArgumentParser();
 parser.add_argument('email')
 parser.add_argument('--printJson', '--json', '-j', action = 'store_true')
 parser.add_argument('-q', '--quiet', action = 'store_true', help = "Don't print the actual output table")
+parser.add_argument('--picture', '-p', action = 'store_true', help = 'Save a picture of this person')
+parser.add_argument('--pictureViewer', default = 'xdg-open')
+parser.add_argument('--verbose', '-v', action = 'store_true')
 args = parser.parse_args();
 
 if "@" not in args.email:
@@ -51,25 +55,53 @@ if "@" not in args.email:
 	else:
 		error("That doesn't look like a valid email address, and you don't have an emailDomain in your config")
 
-buf = StringIO()
-c = pycurl.Curl();
-c.setopt(c.URL, config['url'] + args.email);
-c.setopt(c.USERPWD, config['username'] + ":" + config['password'])
-c.setopt(c.WRITEDATA, buf)
-c.setopt(c.FOLLOWLOCATION, True)
-c.perform();
+def jiveRequest(url):
+	if args.verbose:
+		started = datetime.now()
+		print "req", url
 
-resp = c.getinfo(c.RESPONSE_CODE)
+	buf = StringIO()
+	c = pycurl.Curl();
+	c.setopt(c.URL, url);
+	c.setopt(c.USERPWD, config['username'] + ":" + config['password'])
+	c.setopt(c.WRITEDATA, buf)
+	c.setopt(c.FOLLOWLOCATION, True)
+	c.perform();
 
-c.close();
+	if args.verbose:
+		print "ret completed in ", datetime.now() - started
 
-if resp != 200:
-	error("Response code was: " + str(resp))
+	resp = c.getinfo(c.RESPONSE_CODE)
 
-body = buf.getvalue();
-body = body.replace("throw 'allowIllegalResourceCall is false.';", ""); # wtf
+	c.close();
+
+	if resp != 200:
+		error("Response code was: " + str(resp))
+
+	body = buf.getvalue();
+	body = body.replace("throw 'allowIllegalResourceCall is false.';", ""); # wtf
+
+	return body 
+
+body = jiveRequest(config['url'] + args.email)
 
 person = json.loads(body);
+
+if args.picture:
+	picUrl = person['photos'][0]['value']
+
+	if args.verbose:
+		print "Grabbing picture: " + picUrl
+	
+	picContent = jiveRequest(picUrl);	
+
+	localPictureFilename = expanduser("~") + "/.jivewhois.png"
+
+	pic = open(localPictureFilename, 'w');
+	pic.write(picContent);
+	pic.close();
+
+	os.system(args.pictureViewer + ' ' + localPictureFilename)
 
 if args.printJson:
 	print json.dumps(person, indent = 4)
