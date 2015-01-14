@@ -19,7 +19,7 @@ def error(str):
 def getLocalTime(tzName):
 	tz = timezone(tzName)
 
-	return tz.localize(datetime.now()).strftime("%H:%M")
+	return datetime.now(tz).strftime("%H:%M")
 
 def showPicture():
 	try:
