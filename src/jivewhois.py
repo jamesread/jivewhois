@@ -64,7 +64,7 @@ def jiveRequest(url):
 	c = pycurl.Curl();
 	c.setopt(c.URL, url);
 	c.setopt(c.USERPWD, config['username'] + ":" + config['password'])
-	c.setopt(c.WRITEDATA, buf)
+	c.setopt(c.WRITEFUNCTION, buf.write)
 	c.setopt(c.FOLLOWLOCATION, True)
 	c.perform();
 
