@@ -21,6 +21,27 @@ def getLocalTime(tzName):
 
 	return tz.localize(datetime.now()).strftime("%H:%M")
 
+def showPicture():
+	try:
+		picUrl = person['photos'][0]['value']
+	except KeyError:
+		print "This person does not have a picture."
+		return
+
+	if args.verbose:
+		print "Grabbing picture: " + picUrl
+	
+	picContent = jiveRequest(picUrl);	
+
+	localPictureFilename = expanduser("~") + "/.jivewhois.png"
+
+	pic = open(localPictureFilename, 'w');
+	pic.write(picContent);
+	pic.close();
+
+	os.system(args.pictureViewer + ' ' + localPictureFilename)
+
+
 def readConfig():
 	configFile = expanduser("~") + '/.jivewhois.ini'
 
@@ -88,20 +109,7 @@ body = jiveRequest(config['url'] + args.email)
 person = json.loads(body);
 
 if args.picture:
-	picUrl = person['photos'][0]['value']
-
-	if args.verbose:
-		print "Grabbing picture: " + picUrl
-	
-	picContent = jiveRequest(picUrl);	
-
-	localPictureFilename = expanduser("~") + "/.jivewhois.png"
-
-	pic = open(localPictureFilename, 'w');
-	pic.write(picContent);
-	pic.close();
-
-	os.system(args.pictureViewer + ' ' + localPictureFilename)
+	showPicture()
 
 if args.printJson:
 	print json.dumps(person, indent = 4)
