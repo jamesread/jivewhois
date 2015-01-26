@@ -124,8 +124,10 @@ if not args.quiet:
 	table.add_row(['Location', person['location']]);
 	table.add_row(['Timezone', person['jive']['timeZone'] + " - " + getLocalTime(person['jive']['timeZone'])])
 
-	table.add_row(["---", "---"])
-	for phone in person['phoneNumbers']:
-		table.add_row([phone['jive_label'], phone['value']]);
+	if "phoneNumbers" in person:
+		table.add_row(["---", "---"])
+
+		for phone in person['phoneNumbers']:
+			table.add_row([phone['jive_label'], phone['value']]);
 
 	print table
